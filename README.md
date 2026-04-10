@@ -1,2 +1,2 @@
-# Wallpaper
-papel de parede default para endpoints linux
+# Autopilot
+Automatização do Setup Linux
