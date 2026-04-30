@@ -43,7 +43,8 @@ autoinstall:
     - curtin in-target -- apt-get update
     - curtin in-target -- apt-get install -y google-chrome-stable
     - curtin in-target -- mkdir -p /etc/opt/chrome/policies/forced
-    - ["curtin", "in-target", "--", "bash", "-c", "echo '{\"ExtensionInstallForcelist\": [\"mclkkofklkfljcocdinagocijianpkik;https://clients2.google.com/service/update2/crx\", \"inomeicfmomofachclnbeeidmbiinean;https://clients2.google.com/service/update2/crx\"]}' > /etc/opt/chrome/policies/forced/external_extensions.json"]
+    - ["curtin", "in-target", "--", "bash", "-c", "echo '{\"ExtensionInstallForcelist\": [\"mclkkofklkfljcocdinagocijianpkik;https://clients2.google.com/service/update2/crx\", \"inomeicfmomofachclnbeeidmbiinean;https://clients2.google.com/service/update2/crx\"]}' > /etc/opt/chrome/policies/forced/omie_policy.json"]
+    - curtin in-target -- chmod 644 /etc/opt/chrome/policies/forced/omie_policy.json
     - curtin in-target -- wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb -P /tmp
     - curtin in-target -- apt-get install -y /tmp/chrome-remote-desktop_current_amd64.deb
     - curtin in-target -- mkdir -p /usr/share/backgrounds/omie
