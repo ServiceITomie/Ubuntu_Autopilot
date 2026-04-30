@@ -4,7 +4,7 @@ autoinstall:
   interactive-sections:
     - storage
   identity:
-    realname: Omie Experience
+    realname: Omiexperience
     hostname: omie-temp
     username: omiexperience
     password: '$6$3E2cR0kN9oWblSVO$KiGsxAShHRSAaQ3k81LoJXSyMvBxuJUugy2p7.9xXH76uQOKUTLgh5odn4Fu1fABIqwk0aoVs3rKaI7Ulp14F0'
