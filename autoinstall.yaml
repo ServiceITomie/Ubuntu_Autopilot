@@ -36,8 +36,9 @@ autoinstall:
   late-commands:
     - curtin in-target -- bash -c "echo 'server gps.ntp.br iburst' > /etc/chrony/chrony.conf"
     - curtin in-target -- systemctl restart chrony
-    - curtin in-target -- wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
-    - curtin in-target -- bash -c "echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list"
+    - curtin in-target -- mkdir -p /etc/apt/keyrings
+    - curtin in-target -- curl -fsSl https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
+    - curtin in-target -- sh -c 'echo "deb [signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
     - curtin in-target -- apt-get update
     - curtin in-target -- apt-get install -y google-chrome-stable
     - curtin in-target -- mkdir -p /etc/opt/chrome/policies/forced
