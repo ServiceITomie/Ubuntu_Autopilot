@@ -10,11 +10,11 @@ autoinstall:
     password: '$6$3E2cR0kN9oWblSVO$KiGsxAShHRSAaQ3k81LoJXSyMvBxuJUugy2p7.9xXH76uQOKUTLgh5odn4Fu1fABIqwk0aoVs3rKaI7Ulp14F0'
   locale: pt_BR.UTF-8
   keyboard:
+    layout: br
   apt:
     primary:
       - arches: [amd64]
         uri: http://archive.ubuntu.com/ubuntu
-    layout: br
   timezone: America/Sao_Paulo
   packages:
     - curl
@@ -34,21 +34,35 @@ autoinstall:
   updates: security
   shutdown: reboot
   late-commands:
+    # 1. Ajuste de Horario
     - curtin in-target -- bash -c "echo 'server gps.ntp.br iburst' > /etc/chrony/chrony.conf"
     - curtin in-target -- systemctl restart chrony
+    
+    # 2. GOOGLE CHROME (Metodo Robusto para NO_PUBKEY)
     - curtin in-target -- mkdir -p /etc/apt/keyrings
-    - curtin in-target -- curl -fsSl https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
-    - curtin in-target -- sh -c 'echo "deb [signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list'
+    # Baixamos a chave e salvamos como .asc primeiro, depois dearmore para .gpg
+    - curtin in-target -- bash -c "curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/keyrings/google-chrome.gpg"
+    # Ajustamos a permissao para que o apt consiga ler a chave
+    - curtin in-target -- chmod 644 /etc/apt/keyrings/google-chrome.gpg
+    - curtin in-target -- bash -c "echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list"
+    
+    # 3. Instalacao
     - curtin in-target -- apt-get update
     - curtin in-target -- apt-get install -y google-chrome-stable
+    
+    # 4. Instalacao da extensao Endpoint Verification e Chrome Remote Desktop
     - curtin in-target -- mkdir -p /etc/opt/chrome/policies/forced
     - ["curtin", "in-target", "--", "bash", "-c", "echo '{\"ExtensionInstallForcelist\": [\"mclkkofklkfljcocdinagocijianpkik;https://clients2.google.com/service/update2/crx\", \"inomeicfmomofachclnbeeidmbiinean;https://clients2.google.com/service/update2/crx\"]}' > /etc/opt/chrome/policies/forced/external_extensions.json"]
     - curtin in-target -- wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb -P /tmp
     - curtin in-target -- dpkg -i /tmp/chrome-remote-desktop_current_amd64.deb || apt-get install -f -y
+    
+    # 5. Wallpaper
     - curtin in-target -- mkdir -p /usr/share/backgrounds/omie
     - curtin in-target -- curl -sL "https://raw.githubusercontent.com/ServiceITomie/Ubuntu_Autopilot/main/wallpaper-omie.jpg" -o /usr/share/backgrounds/omie/wallpaper-omie.jpg
     - curtin in-target -- bash -c "echo '[org.gnome.desktop.background]' > /usr/share/glib-2.0/schemas/10_omie_wallpaper.gschema.override"
     - curtin in-target -- bash -c "echo \"picture-uri='file:///usr/share/backgrounds/omie/wallpaper-omie.jpg'\" >> /usr/share/glib-2.0/schemas/10_omie_wallpaper.gschema.override"
     - curtin in-target -- bash -c "echo \"picture-uri-dark='file:///usr/share/backgrounds/omie/wallpaper-omie.jpg'\" >> /usr/share/glib-2.0/schemas/10_omie_wallpaper.gschema.override"
     - curtin in-target -- glib-compile-schemas /usr/share/glib-2.0/schemas/
+    
+    # 6. Snapshot Final
     - curtin in-target -- timeshift --create --comments "Snapshot Inicial TI" --tags D
